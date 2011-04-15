@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>The Internet Presents</title>
+<style>
+	.images img {
+		border:1px solid black;
+		height:200px;
+	}
+</style>
+</head>
+
+<body>
+<div class="images"></div>
+<div class="tweets"></div>
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script>
+
+	var tweets = {};
+	var url = "";
+	var imgurl = "";
+	var frequency = 1000;
+	var mostRecent = 0;
+	var rpp = 25;
+	
+	var term = "%23mcleodwedding";
+	term = "twitpic";
+	
+	if((window.location+"").indexOf("?")>-1) {
+		urlvars = (window.location+"").split("?")[1];
+		term = urlvars;
+	}
+	
+	function index(data) {
+		for(var t=0;t<data.results.length;t++) {
+			if($(".tweet_" + data.results[t].id).length==0) {
+				$(".tweets").prepend("<li class='tweet_" + data.results[t].id + "'>" + data.results[t].text  + "</li>");
+			}
+			
+			// does it have a link
+			if(data.results[t].text.indexOf("http://")>-1) {
+				
+				url = data.results[t].text.split("http://");
+				url = "http://" + url[1].split(" ")[0];
+
+				if($(".image_" + data.results[t].id).length==0) {
+					// is it twitpic?
+					if(data.results[t].text.indexOf("twitpic.com/")>-1) {
+						imgurl = url.split(".com/");
+						imgurl = imgurl[0] + ".com/show/thumb/" + imgurl[1];
+						$(".images").prepend("<img class='image_" + data.results[t].id + "' src='" + imgurl + "'>");		
+					}
+					
+					// is it yfrog?
+					if(data.results[t].text.indexOf("yfrog.com/")>-1) {
+						imgurl = url + ".th.jpg";
+						$(".images").prepend("<img class='image_" + data.results[t].id + "' src='" + imgurl + "'>");		
+					}
+					
+					// is it plixi?
+					if(data.results[t].text.indexOf("plixi.com/")>-1) {
+						imgurl = "http://api.plixi.com/api/tpapi.svc/imagefromurl?size=thumb&url=" + url
+						$(".images").prepend("<img class='image_" + data.results[t].id + "' src='" + imgurl + "'>");		
+					}
+					
+					// is it imgur?
+					if(data.results[t].text.indexOf("imgur.com/")>-1) {
+						imgurl = url
+						$(".images").prepend("<img class='image_" + data.results[t].id + "' src='" + imgurl + "'>");		
+					}					
+				}
+				
+			}
+			mostRecent = data.results[t].id;
+		}		
+	}
+	
+	function query() {
+//		console.log("http://search.twitter.com/search.json?q=" + term + "&rpp=" + rpp + "&since_id=" + mostRecent + "&callback=?");
+		$.getJSON("http://search.twitter.com/search.json?q=" + term + "&rpp=" + rpp + "&since_id=" + mostRecent + "&callback=?",function(data) {
+			index(data);																								
+		});	
+	}	
+	
+	$(function() {
+		$.getJSON("http://search.twitter.com/search.json?q=" + term + "&rpp=100&callback=?",function(data) {
+			index(data);
+		});
+		setInterval(query,frequency);
+	});
+	
+
+</script>
+</body>
+</html>

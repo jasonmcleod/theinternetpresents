@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>TIP</title>
+<style>
+	* {
+		margin:0px;
+		padding:0px;
+	}
+	.pixel {
+		width:32px;
+		height:32px;
+		position:absolute;		
+	}
+	.on {
+		background-color:rgba(0,0,0,0);	
+	}
+	.off {
+		background-color:rgba(0,0,0,0);			
+	}
+	.pixel img {
+		width:30px;
+		height:30px;	
+		border:1px solid #000;
+	}
+</style>
+</head>
+
+<body>
+<div id="container"></div>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script src="js/characters.js"></script>
+<script>
+
+	var term = "twitpic";
+	
+	if((window.location+"").indexOf("?")>-1) {
+		term = (window.location+"").split("?")[1];	
+	}
+	var rpp = 10;
+	var mostRecent = 0;
+	var offsetX = 0;
+	var size = 32;
+
+	chars = term.split("");
+	for(var c=0;c<chars.length;c++) {
+		var grid = characters[chars[c]];			
+		for(var y=0;y<5;y++) {			
+			for(var x=0;x<grid[0].length;x++) {					
+				$("#container").append("<div class='pixel " + (grid[y][x]==1?"on":"off") + "' style='top:" + (y*size) + "px; left:" + (offsetX + (x*size)) + "px'></div>");		
+				//console.log(grid[y].length+1);
+			}
+		}
+		offsetX+=(grid[0].length+1)*size;			
+	}
+	
+	function stream() {
+		$.getJSON("http://search.twitter.com/search.json?q=" + term + "&rpp=" + rpp + "&since_id=" + mostRecent + "&callback=?",function(msg) {
+			//console.log(msg);
+			for(var r=0;r<msg.results.length;r++) {
+				mostRecent = msg.results[r].id;
+				var html = "";
+				/*
+				if(msg.results[r].text.indexOf("http://")>-1) {
+					var url = msg.results[r].text.split(" ");
+					for(var word in url) {
+						if(url[word].substr(0,7)=="http://") {
+							//console.log(url[word]);	
+							var preload = new Image();
+							preload.src = "http://localhost:8887/get/" + url[word];
+							preload.onload = function() {
+								//console.log(url);
+								url[word] = "<img height='100' align='left' src='" + this.src + "'>";
+								if($("img[src='']").length==0) {
+									$("#tweets").prepend("<li class='noheight'>" + url.join(" ") + "</li>");	
+									$(".noheight").animate({height:120},300,function() { $(this).removeClass("noheight"); });								
+								}
+							}
+						}
+					}
+				} else {
+					$("#tweets").prepend("<li id='tweet_" + msg.results[r].id + "' class='noheight'>" + msg.results[r].text + "</li>");	
+					$(".noheight").animate({height:120},300,function() { $(this).removeClass("noheight"); });
+				}
+				*/
+				$(".pixel.on:not('.filled'):first").html("<img src='" + msg.results[r].profile_image_url + "'>").addClass("filled");	
+			}
+		});
+	}
+	
+	setInterval(stream,2000);
+</script>
+</body>
+</html>

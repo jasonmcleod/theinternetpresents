@@ -1,0 +1,11 @@
+AddHandler php5-script .php
+
+RewriteEngine On
+RewriteBase "/theinternetpresents.com/"
+#RewriteCond %{HTTP_USER_AGENT} iPhone
+#RewriteCond %{REQUEST_URI} !^/_m/
+#RewriteRule .php /_m/ [R]
+
+#RewriteRule _m/([A-Za-z0-9-~\]]+)/?$ _m/index.php?term=$1 [QSA,NC]
+RewriteRule ^([A-Za-z0-9-~\]]+)/?$ index.php?term=$1 [QSA,NC]
+
