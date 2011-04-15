@@ -1,7 +1,0 @@
-AddHandler php5-script .php
-
-RewriteEngine On
-RewriteBase "/_m/"
-
-RewriteRule ^([A-Za-z0-9-~\]]+)/?$ index.php?term=$1 [QSA,NC]
-
